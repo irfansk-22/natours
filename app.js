@@ -2,27 +2,18 @@ const fs = require('fs');
 const express = require('express');
 
 const app = express();
-
 app.use(express.json());
 /**
- * Here express.json is a middleware, and middleware is basically just a function that 
+ * Here express.json is a middleware, and middleware is basically just a function that
  * can modify the incoming request data. So it's called middlware because it stands between
  * so in the middle of the request and responses.
  */
-
-// app.get('/', (req, res) => {
-//   res.status(200).json({ message: 'Hello from the server', app: 'Natours' });
-// });
-
-// app.post('/', (req, res) => {
-//   res.send('Something');
-// });
 
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-app.get('/api/v1/tours', (req, res) => {
+const getAllTour = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -30,16 +21,17 @@ app.get('/api/v1/tours', (req, res) => {
       tours,
     },
   });
-});
+};
 
+const getTour = (req, res) => {
+  /*
+  CHECKING FOR MULTIPLE PARAMETERS AND SETTING Y PARAM OPTIONAL
+    app.get('/api/v1/tours/:id/:x/:y?', (req, res) => {
+        console.log(req.params);
+      });
+  */
 
-//CHECKING FOR MULTIPLE PARAMETERS AND SETTING Y PARAM OPTIONAL
-// app.get('/api/v1/tours/:id/:x/:y?', (req, res) => {
-//   console.log(req.params);
-// });
-
-app.get('/api/v1/tours/:id', (req, res) => {
-  console.log(req.params);
+  // console.log(req.params);
 
   //converting number string in to the actuall number data type
   const id = req.params.id * 1;
@@ -52,12 +44,13 @@ app.get('/api/v1/tours/:id', (req, res) => {
    * Now what the find() method will then do is that bascically, it
    * will create an array which only contains the element where this
    * comparison turns out to be ture.
-  */
+   */
+
+  //  console.log(!tour);
+  //  console.log('******');
+  //  console.log(tour);
 
   // if (id > tours.length) {
-  console.log(!tour);
-  console.log('******');
-  console.log(tour);
   // If there is no tour with that ID the tour variable will be undefined
   if (!tour) {
     return res.status(404).json({
@@ -72,14 +65,14 @@ app.get('/api/v1/tours/:id', (req, res) => {
       tour,
     },
   });
-});
+};
 
-app.post('/api/v1/tours', (req, res) => {
+const createTour = (req, res) => {
   // console.log(req.body);
 
-//  When we create the new object we never specify the ID of the new
-// object, the database usually takes care of that. So new object 
-// automatically gets the new id.
+  //  When we create the new object we never specify the ID of the new
+  // object, the database usually takes care of that. So new object
+  // automatically gets the new id.
   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
 
@@ -98,19 +91,19 @@ app.post('/api/v1/tours', (req, res) => {
       });
     }
   );
-});
+};
 
-/**
- * We have to verbs to update the data PUT and PATCH 
- * with PUT we accept that our application receives the entire 
- * new updated object,
- * 
- * PATCH only updates the data that is changing.
- * 
- */
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
+  /**
+   * We have to verbs to update the data PUT and PATCH
+   * with PUT we accept that our application receives the entire
+   * new updated object,
+   *
+   * PATCH only updates the data that is changing.
+   *
+   */
 
-  if ((req.params.id * 1) > tours.length) {
+  if (req.params.id * 1 > tours.length) {
     return res.status(404).json({
       status: 'fail',
       message: 'Invalid ID',
@@ -120,13 +113,13 @@ app.patch('/api/v1/tours/:id', (req, res) => {
   res.status(200).json({
     status: 'success',
     data: {
-      tour: '<Updated tour here...>'
-    }
+      tour: '<Updated tour here...>',
+    },
   });
-});
+};
 
-app.delete('/api/v1/tours/:id', (req, res) => {
-  if ((req.params.id * 1) > tours.length) {
+const deleteTour = (req, res) => {
+  if (req.params.id * 1 > tours.length) {
     return res.status(404).json({
       status: 'fail',
       message: 'Invalid ID',
@@ -135,9 +128,22 @@ app.delete('/api/v1/tours/:id', (req, res) => {
 
   res.status(204).json({
     status: 'success',
-    data: null
+    data: null,
   });
-});
+};
+
+// app.get('/api/v1/tours', getAllTour);
+// app.get('/api/v1/tours/:id', getTour);
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+app.route('/api/v1/tours').get(getAllTour).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const PORT = 3000;
 app.listen(PORT, () => {

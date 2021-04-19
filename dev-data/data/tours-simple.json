@@ -143,5 +143,7 @@
     "name": "Test tour6767676",
     "duration": 5,
     "difficulty": "medium"
-  }
+  },
+  { "id": 14, "name": "Test tour9999", "duration": 5, "difficulty": "medium" },
+  { "id": 15, "name": "Test tour9999", "duration": 5, "difficulty": "medium" }
 ]
