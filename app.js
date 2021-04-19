@@ -1,7 +1,12 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
+
+// 1) MIDDLEWARES
+app.use(morgan('dev'));
+
 app.use(express.json());
 /**
  * Here express.json is a middleware, and middleware is basically just a function that
@@ -9,13 +14,30 @@ app.use(express.json());
  * so in the middle of the request and responses.
  */
 
+app.use((req, res, next) => {
+  console.log('Hello from the middleware!');
+  //ALWAYS USE NEXT() FUNCTION ELSE THE FUNCTION EXECUTION WILL STUCK AND
+  // CLIENT WILL NEVER RECEIVE RESPONSE
+  next();
+});
+
+//Middle ware to manipulate request object. adding new property (currentTime) to the request object
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+// 2) ROUTE HANDLERS
 const getAllTour = (req, res) => {
+  console.log(req.requestTime);
+
   res.status(200).json({
     status: 'success',
+    requestedAt: req.requestTime,
     results: tours.length,
     data: {
       tours,
@@ -70,7 +92,7 @@ const getTour = (req, res) => {
 const createTour = (req, res) => {
   // console.log(req.body);
 
-  //  When we create the new object we never specify the ID of the new
+  // When we create the new object we never specify the ID of the new
   // object, the database usually takes care of that. So new object
   // automatically gets the new id.
   const newId = tours[tours.length - 1].id + 1;
@@ -132,19 +154,81 @@ const deleteTour = (req, res) => {
   });
 };
 
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!'
+  });
+};
+
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!'
+  });
+};
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!'
+  });
+};
+
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!'
+  });
+};
+
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!'
+  });
+};
+
 // app.get('/api/v1/tours', getAllTour);
 // app.get('/api/v1/tours/:id', getTour);
 // app.post('/api/v1/tours', createTour);
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
 
+// 3) ROUTES
 app.route('/api/v1/tours').get(getAllTour).post(createTour);
+
+/**
+ * If we make a post request here then the middle ware below will
+ * never execute as it comes after the post request middleware.
+ * the post middle ware completes the request response cycle so
+ * it never goes further to other middleware. in this case the
+ * middleware below.
+ *
+ * However if we make a patch or delete request the middleware below
+ * will execute as it is coming before those middlewares.
+ *
+ * SO THE ORDER IN WHICH MIDDLEWARES ARE PRSENT REALLY MATTERS IN EXPRESS.
+ */
+// app.use((req, res, next) => {
+//   console.log('Hello from the middleware!');
+//   next();
+// });
+
 app
   .route('/api/v1/tours/:id')
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
 
+app.route('/api/v1/users').get(getAllUsers).post(createUser);
+app
+  .route('/api/v1/users/:id')
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
+
+// 4) START SERVER
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`App is running on port ${PORT}`);
