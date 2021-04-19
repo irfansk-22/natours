@@ -4,6 +4,23 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+/**
+ * philosophy of express: we should always work with middleware stack (pipeline)
+ * as much as we can.
+ */
+
+exports.checkID = (req, res, next, val) => {
+  console.log(`Tour ID is : ${val}`);
+
+  if ((req.params.id * 1) > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+  next();
+}
+
 exports.getAllTour = (req, res) => {
   console.log(req.requestTime);
 
@@ -18,13 +35,6 @@ exports.getAllTour = (req, res) => {
 };
 
 exports.getTour = (req, res) => {
-  /*
-  CHECKING FOR MULTIPLE PARAMETERS AND SETTING Y PARAM OPTIONAL
-    app.get('/api/v1/tours/:id/:x/:y?', (req, res) => {
-        console.log(req.params);
-      });
-  */
-
   // console.log(req.params);
 
   //converting number string in to the actuall number data type
@@ -39,19 +49,6 @@ exports.getTour = (req, res) => {
    * will create an array which only contains the element where this
    * comparison turns out to be ture.
    */
-
-  //  console.log(!tour);
-  //  console.log('******');
-  //  console.log(tour);
-
-  // if (id > tours.length) {
-  // If there is no tour with that ID the tour variable will be undefined
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
 
   res.status(200).json({
     status: 'success',
@@ -88,22 +85,6 @@ exports.createTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-  /**
-   * We have to verbs to update the data PUT and PATCH
-   * with PUT we accept that our application receives the entire
-   * new updated object,
-   *
-   * PATCH only updates the data that is changing.
-   *
-   */
-
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-
   res.status(200).json({
     status: 'success',
     data: {
@@ -113,13 +94,6 @@ exports.updateTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-
   res.status(204).json({
     status: 'success',
     data: null,
