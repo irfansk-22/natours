@@ -157,35 +157,35 @@ const deleteTour = (req, res) => {
 const getAllUsers = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined!'
+    message: 'This route is not yet defined!',
   });
 };
 
 const getUser = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined!'
+    message: 'This route is not yet defined!',
   });
 };
 
 const createUser = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined!'
+    message: 'This route is not yet defined!',
   });
 };
 
 const updateUser = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined!'
+    message: 'This route is not yet defined!',
   });
 };
 
 const deleteUser = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined!'
+    message: 'This route is not yet defined!',
   });
 };
 
@@ -196,7 +196,9 @@ const deleteUser = (req, res) => {
 // app.delete('/api/v1/tours/:id', deleteTour);
 
 // 3) ROUTES
-app.route('/api/v1/tours').get(getAllTour).post(createTour);
+const tourRoute = express.Router();
+app.use('/api/v1/tours', tourRoute);
+tourRoute.route('/').get(getAllTour).post(createTour);
 
 /**
  * If we make a post request here then the middle ware below will
@@ -215,18 +217,13 @@ app.route('/api/v1/tours').get(getAllTour).post(createTour);
 //   next();
 // });
 
-app
-  .route('/api/v1/tours/:id')
-  .get(getTour)
-  .patch(updateTour)
-  .delete(deleteTour);
+tourRoute.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
-app.route('/api/v1/users').get(getAllUsers).post(createUser);
-app
-  .route('/api/v1/users/:id')
-  .get(getUser)
-  .patch(updateUser)
-  .delete(deleteUser);
+const userRoute = express.Router();
+app.use('/api/v1/users', userRoute);
+
+userRoute.route('/').get(getAllUsers).post(createUser);
+userRoute.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
 // 4) START SERVER
 const PORT = 3000;
