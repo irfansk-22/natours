@@ -1,9 +1,9 @@
 const express = require('express');
-const tourController = require('./../controllers/tourController');
+const tourController = require('../controllers/tourController');
 
 const router = express.Router();
 
-//In param middleware function we also get the access to the fourth argument 
+//In param middleware function we also get the access to the fourth argument
 //that is actually the value of the parameter in question
 router.param('id', tourController.checkID);
 
