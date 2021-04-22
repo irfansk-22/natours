@@ -1,21 +1,29 @@
 //This file is the entry point of our app where we will put all the things that are
 //related to our server, db connectivity or env and not things about the express.
 
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const app = require('./app');
 
 dotenv.config({ path: './config.env' });
 
-const app = require('./app');
+const DB = process.env.DATABASE.replace(
+  '<PASSWORD>',
+  process.env.DATABASE_PASSWORD
+);
 
-// console.log(app.get('env'));
-/**
- * environment variables are global variables that are used to
- * define the enviornment in which a node app is running.
- * This one is set by express but nodejs itself actaully sets
- * a lot of environment variables. example below
- */
-
-// console.log(process.env);
+mongoose
+  .connect(DB, {
+    // Options to deal with the deprecation warnings.
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    // console.log(con.connections);
+    console.log('DB connection successful');
+  });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
