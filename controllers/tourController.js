@@ -1,79 +1,98 @@
 const Tour = require('../models/tourModel');
 
-/*
-philosophy of express: we should always work with middleware stack (pipeline)
-as much as we can.
-*/
+exports.getAllTour = async (req, res) => {
+  try {
+    const tours = await Tour.find();
 
-exports.checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.name) {
-    return res.status(400).json({
+    res.status(200).json({
+      status: 'success',
+      requestedAt: req.requestTime,
+      results: tours.length,
+      //the original data is wraped in envolpe object data{} ~ Jsend response formating
+      data: {
+        tours,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
       status: 'fail',
-      message: 'missing name or price',
+      message: err,
     });
   }
-  next();
 };
 
-exports.getAllTour = (req, res) => {
-  // console.log(req.requestTime);
+exports.getTour = async (req, res) => {
+  try {
+    const tour = await Tour.findById(req.params.id);
+    // findById() is exactly similar to this -> Tour.findOne({ _id: req.params.id });
+    // mongoose gives this shorthand
 
-  res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime,
-    //the original data is wraped in envolpe object data{} ~ Jsend response formating
-    data: {},
-  });
-};
-
-exports.getTour = (req, res) => {
-  // console.log(req.params);
-  res.status(200).json({
-    status: 'success',
-    data: {},
-  });
-};
-
-exports.createTour = (req, res) => {
-  res.status(201).json({
-    status: 'success',
-    data: {},
-  });
-};
-
-exports.updateTour = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: '<Updated tour here...>',
-    },
-  });
-};
-
-exports.deleteTour = (req, res) => {
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-};
-
-/*
-// This function(checkID)is no longer needed as mongoose validates id itself but this
-// is pretty useful example of understanding how the middleware functions works
-// that's why keeping it hear for reference.
-
-// In param middleware function we also get the access to the fourth argument
-// that is actually the value of the parameter in question
-
-exports.checkID = (req, res, next, val) => {
-  // console.log(`Tour ID is : ${val}`);
-
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
       status: 'fail',
-      message: 'Invalid ID',
+      message: err,
     });
   }
-  next();
 };
-*/
+
+exports.createTour = async (req, res) => {
+  try {
+    // const newTours = new Tour({});
+    // newTours.save();
+
+    const newTour = await Tour.create(req.body);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.updateTour = async (req, res) => {
+  try {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: tour,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.deleteTour = async (req, res) => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: 'success',
+      data: 'tour deleted',
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
