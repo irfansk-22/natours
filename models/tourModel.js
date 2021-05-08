@@ -111,7 +111,7 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
-//DOCUMENT MIDDLEWARE runs before .save() and .create()
+//DOCUMENT MIDDLEWARE runs between receiving the data and before saving it using .save() or .create()
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
