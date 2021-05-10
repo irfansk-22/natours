@@ -19,6 +19,7 @@ app.use(express.json());
 //Middle ware to manipulate request object. adding new property (currentTime) to the request object
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  // console.log(req.headers);
   next();
 });
 

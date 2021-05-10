@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
       message: 'Password are not the same',
     },
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -64,18 +65,19 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-/**
- * In the above code we can elemintate the need of second parameter(userPassword)
- * as we have access to this.password even after setting it to
- * false in the model because we are specifically selecting it again in the login
- * function of authController so that's why we have got the access to the
- * this.password property.
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
 
- * userSchema.methods.correctPassword = async function (candidatePassword) {
- *   return await bcrypt.compare(candidatePassword, this.password);
- * };
- * 
- */
+    // console.log(changedTimestamp, JWTTimestamp);
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  return false;
+};
 
 const User = mongoose.model('User', userSchema);
 

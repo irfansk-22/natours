@@ -3,6 +3,7 @@
 
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const colors = require('colors');
 
 //catch UNCAUGHT EXCEPTIONS
 process.on('uncaughtException', (err) => {
@@ -34,7 +35,10 @@ mongoose
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
-  console.log(`App is running on port ${PORT}`);
+  console.log(
+    `App is running on port ${PORT} in ${process.env.NODE_ENV} environment`
+      .bgBlue
+  );
 });
 
 //Handle UNHANDLED REJECTION
