@@ -13,6 +13,29 @@ const signToken = (id) =>
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+    /**
+     * httpOnly will make cookie so that the cookie cannot be
+     * accessed or modified in any way by the browser. this is
+     * important in order to prevent XSS attacks.
+     *
+     * so all the browser is gonna do when we set httpOnly to true is to basically
+     * receive the cookie, store it, and then send it automatically
+     * along with every request.
+     */
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
+  res.cookie('jwt', token, cookieOptions);
+
+  // Remove the password from the output
+  user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
