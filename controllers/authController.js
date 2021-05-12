@@ -77,7 +77,9 @@ exports.protect = catchAsync(async (req, res, next) => {
   // console.log(token);
 
   if (!token) {
-    return next(new AppError());
+    return next(
+      new AppError('You are not logged in! Please log in to get access.', 401)
+    );
   }
 
   // 2) Varification token
